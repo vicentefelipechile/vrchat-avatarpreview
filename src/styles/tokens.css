@@ -1,0 +1,16 @@
+/* Design tokens — colors, sizes, radius */
+:root {
+    --bg:        #0f0f1a;
+    --bg-panel:  #16162a;
+    --bg-item:   #1e1e35;
+    --bg-hover:  #252545;
+    --border:    #2a2a4a;
+    --accent:    #7c6aff;
+    --accent-h:  #9b8dff;
+    --text:      #e2e2f0;
+    --text-dim:  #8888aa;
+    --warn:      #f0a040;
+    --ok:        #40d080;
+    --radius:    6px;
+    --panel-w:   300px;
+}
