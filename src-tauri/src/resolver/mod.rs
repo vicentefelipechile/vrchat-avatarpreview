@@ -9,7 +9,7 @@ use crate::parser::classifier::{classify_by_extension, AssetKind};
 use crate::parser::guid_map::{Guid, GuidMap};
 use crate::parser::material::{parse_material, RawMaterial};
 use crate::parser::prefab::{parse_prefab, PrefabData, RawSkinnedMeshRenderer};
-use crate::parser::shader_compat::detect_shader_family;
+use crate::parser::shader_compat::{detect_shader_family, infer_shader_from_props};
 use crate::scene::{AvatarStats, ResolvedMaterial, SceneGraph, SceneNode, VariantGroup};
 
 pub fn resolve(guid_map: &GuidMap) -> Result<SceneGraph> {
@@ -138,13 +138,32 @@ pub fn resolve(guid_map: &GuidMap) -> Result<SceneGraph> {
                         shader_entry.pathname.clone(),
                     )
                 } else {
-                    warnings.push(format!(
-                        "Shader GUID {sg} not found in package — using fallback material."
-                    ));
-                    (
-                        crate::scene::ShaderFamily::Unknown("External Shader".to_string()),
-                        "External Shader".to_string(),
-                    )
+                    // Shader file not bundled — infer family from material property names
+                    let inferred = if let Some(rm) = raw {
+                        let float_keys: Vec<&str> = rm.floats.keys().map(|s| s.as_str()).collect();
+                        let tex_keys: Vec<&str> = rm.texture_guids.keys().map(|s| s.as_str()).collect();
+                        infer_shader_from_props(&float_keys, &tex_keys)
+                    } else {
+                        None
+                    };
+
+                    if let Some(family) = inferred {
+                        let raw_name = match &family {
+                            crate::scene::ShaderFamily::Poiyomi => "Poiyomi Toon.shader",
+                            crate::scene::ShaderFamily::LilToon => "lilToon.shader",
+                            crate::scene::ShaderFamily::XSToon => "XSToon.shader",
+                            _ => "External Shader",
+                        };
+                        (family, raw_name.to_string())
+                    } else {
+                        warnings.push(format!(
+                            "Shader GUID {sg} not found in package — using fallback material."
+                        ));
+                        (
+                            crate::scene::ShaderFamily::Unknown("External Shader".to_string()),
+                            "External Shader".to_string(),
+                        )
+                    }
                 }
             } else {
                 (
@@ -198,8 +217,16 @@ pub fn resolve(guid_map: &GuidMap) -> Result<SceneGraph> {
             })
             .unwrap_or(0.5);
 
+        let material_name = guid_map
+            .get(mat_guid)
+            .and_then(|e| std::path::Path::new(&e.pathname).file_stem())
+            .and_then(|s| s.to_str())
+            .unwrap_or("")
+            .to_string();
+
         resolved_materials.push(ResolvedMaterial {
             slot_index: slot_index as u32,
+            material_name,
             shader_family,
             shader_raw_name,
             albedo_path,

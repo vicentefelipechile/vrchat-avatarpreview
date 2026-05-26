@@ -16,8 +16,11 @@ interface SlotState {
 
 const slotStates = new Map<number, SlotState>();
 
-export function renderShaderPanel(container: HTMLElement, materials: ResolvedMaterial[]): void {
+export function clearShaderPanelState(): void {
     slotStates.clear();
+}
+
+export function renderShaderPanel(container: HTMLElement, materials: ResolvedMaterial[]): void {
     container.innerHTML = '';
 
     if (materials.length === 0) {
@@ -30,15 +33,17 @@ export function renderShaderPanel(container: HTMLElement, materials: ResolvedMat
     section.innerHTML = '<div class="panel-section-title">Materials</div>';
 
     for (const mat of materials) {
-        const isPBR = mat.shader_family.type === 'Standard' || mat.shader_family.type === 'URP';
-        slotStates.set(mat.slot_index, {
-            mode: getMaterialInstance(mat.slot_index) instanceof THREE.MeshStandardMaterial ? 'pbr' : (isPBR ? 'pbr' : 'toon'),
-            normalScale: 1.0,
-            emissionIntensity: 1.0,
-            metallic: mat.metallic,
-            roughness: 1 - mat.smoothness,
-            expanded: false,
-        });
+        if (!slotStates.has(mat.slot_index)) {
+            const isPBR = mat.shader_family.type === 'Standard' || mat.shader_family.type === 'URP';
+            slotStates.set(mat.slot_index, {
+                mode: getMaterialInstance(mat.slot_index) instanceof THREE.MeshStandardMaterial ? 'pbr' : (isPBR ? 'pbr' : 'toon'),
+                normalScale: 1.0,
+                emissionIntensity: 0.0,
+                metallic: mat.metallic,
+                roughness: 1 - mat.smoothness,
+                expanded: false,
+            });
+        }
         section.appendChild(buildMaterialBlock(mat));
     }
 
@@ -56,7 +61,7 @@ function buildMaterialBlock(mat: ResolvedMaterial): HTMLElement {
     const badgeClass = `shader-badge shader-${mat.shader_family.type.toLowerCase()}`;
 
     const thumbHtml = mat.albedo_path
-        ? `<img class="mat-thumb" src="${convertFileSrc(mat.albedo_path)}" alt="albedo" loading="lazy" />`
+        ? `<img class="mat-thumb" src="${convertFileSrc(mat.albedo_path)}" alt="albedo" />`
         : `<div class="mat-thumb mat-thumb-color" style="background:${hexColor}"></div>`;
 
     const CHEVRON_SVG = `<svg class="mat-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;

@@ -63,12 +63,12 @@ function buildShapeRow(shape: BlendShape): HTMLElement {
     slider.min = '0';
     slider.max = '1';
     slider.step = '0.01';
-    slider.value = '0';
+    slider.value = String(shape.defaultValue);
     slider.className = 'shape-slider';
 
     const valueEl = document.createElement('span');
     valueEl.className = 'shape-value';
-    valueEl.textContent = '0%';
+    valueEl.textContent = Math.round(shape.defaultValue * 100) + '%';
 
     slider.addEventListener('input', () => {
         const v = parseFloat(slider.value);

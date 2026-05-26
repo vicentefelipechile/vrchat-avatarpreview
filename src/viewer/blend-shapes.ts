@@ -6,6 +6,7 @@ export interface BlendShape {
     rawName: string;
     meshRef: THREE.Mesh;
     index: number;
+    defaultValue: number;
     category: 'Body' | 'Clothing' | 'Other';
 }
 
@@ -42,11 +43,13 @@ export function collectBlendShapes(): BlendShape[] {
 
         for (const [rawName, index] of Object.entries(dict)) {
             const name = cleanName(rawName);
+            const defaultValue = obj.morphTargetInfluences?.[index] ?? 0;
             shapes.push({
                 cleanName: name,
                 rawName,
                 meshRef: obj,
                 index,
+                defaultValue,
                 category: categorize(name),
             });
         }

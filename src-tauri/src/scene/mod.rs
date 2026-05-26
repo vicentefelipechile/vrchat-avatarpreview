@@ -23,6 +23,7 @@ pub struct SceneNode {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResolvedMaterial {
     pub slot_index: u32,
+    pub material_name: String,
     pub shader_family: ShaderFamily,
     pub shader_raw_name: String,
     pub albedo_path: Option<String>,

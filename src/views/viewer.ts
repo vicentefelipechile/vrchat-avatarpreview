@@ -2,7 +2,7 @@ import type { SceneGraph } from '../types/scene';
 import { navigate } from '../router';
 import { renderObjectPanel } from '../panels/object-panel';
 import { renderBlendShapePanel } from '../panels/blend-shape-panel';
-import { renderShaderPanel } from '../panels/shader-panel';
+import { renderShaderPanel, clearShaderPanelState } from '../panels/shader-panel';
 import { renderWarningsPanel } from '../panels/warnings-panel';
 import { renderStatsBar } from '../panels/stats-bar';
 import { initScene, clearMeshes } from '../viewer/scene';
@@ -91,6 +91,7 @@ function initLayout(container: HTMLElement): void {
 
     // Back button — keep Three.js scene alive (never dispose), just clear loaded objects
     document.getElementById('btn-back')!.addEventListener('click', () => {
+        clearShaderPanelState();
         clearMaterialInstances();
         clearMeshes();
         navigate('welcome');

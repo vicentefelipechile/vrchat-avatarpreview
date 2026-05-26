@@ -16,7 +16,7 @@ const texLoader = new THREE.TextureLoader();
 
 function defaultMode(mat: ResolvedMaterial): 'toon' | 'pbr' {
     const t = mat.shader_family.type;
-    return t === 'Standard' || t === 'URP' ? 'pbr' : 'toon';
+    return t === 'Unknown' ? 'toon' : 'pbr';
 }
 
 export function buildMaterial(mat: ResolvedMaterial): THREE.Material {
@@ -70,7 +70,7 @@ function createMaterial(mat: ResolvedMaterial, params: MaterialParams): THREE.Ma
     const [er, eg, eb] = mat.emission_color;
     const hasEmission = emissionMap !== null || er > 0.001 || eg > 0.001 || eb > 0.001;
     const emissive = hasEmission ? new THREE.Color(er, eg, eb) : new THREE.Color(0, 0, 0);
-    const emissiveIntensity = params.emissionIntensity ?? 1.0;
+    const emissiveIntensity = params.emissionIntensity ?? 0.0;
     const normalScale = params.normalScale ?? 1.0;
 
     if (mode === 'pbr') {

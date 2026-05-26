@@ -24,6 +24,7 @@ export type ShaderFamily =
 
 export interface ResolvedMaterial {
     slot_index: number;
+    material_name: string;
     shader_family: ShaderFamily;
     shader_raw_name: string;
     albedo_path: string | null;
